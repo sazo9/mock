@@ -1,8 +1,13 @@
 const bodyParser = require("body-parser");
 const express = require("express");
+const logger = require("./controllers/logger");
+const httpLogger = require("./controllers/httpLogger");
+
+const getSession = require("./controllers/getSession");
+const getProtocol = require("./controllers/getProtocol");
 
 const app = express();
-//app.use(httpLogger);
+app.use(httpLogger);
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -117,6 +122,38 @@ function step103() {
   };
 }
 
+// get a new session
+app.get("/session", async (req, res) => {
+  try {
+    console.log("Executing GET session API");
+    logger.request(req, res);
+    let session = await getSession(req, res);
+    console.log("Result from GET session API", session);
+    logger.info("[SessionID] %s", session);
+    logger.info("[Route] %s", req.route);
+    logger.info("[Header] %s", req.headers);
+    //logger.info("Request Query Params:", req.query); // for all query params
+    //logger.info("Request Path:", req.path);
+
+    res.status(200).json({ data: session } || []);
+  } catch (e) {
+    logger.error("error: ", e);
+    res.status(500).send({ error: e.message });
+  }
+});
+
+// get a new protocol
+app.get("/protocol", async (req, res) => {
+  try {
+    console.log("Executing GET protocol API");
+    let protocol = await getProtocol(req, res);
+    console.log("Result from GET protocol API", protocol);
+    res.status(200).json({ data: protocol } || []);
+  } catch (e) {
+    res.status(500).send({ error: e.message });
+  }
+});
+
 // get test info
 app.get("/echo", (req, res) => {
   console.log("Executing GET echo API");
@@ -125,6 +162,17 @@ app.get("/echo", (req, res) => {
   console.log("Result from GET echo API", response);
   res.status(200).json({ response } || []);
 });
+
+app.use(logErrors);
+app.use(errorHandler);
+
+function logErrors(err, req, res, next) {
+  console.error(err.stack);
+  next(err);
+}
+function errorHandler(err, req, res, next) {
+  res.status(500).send("Error!");
+}
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
