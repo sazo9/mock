@@ -126,17 +126,6 @@ app.get("/echo", (req, res) => {
   res.status(200).json({ response } || []);
 });
 
-app.use(logErrors);
-app.use(errorHandler);
-
-function logErrors(err, req, res, next) {
-  console.error(err.stack);
-  next(err);
-}
-function errorHandler(err, req, res, next) {
-  res.status(500).send("Error!");
-}
-
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}...`);
