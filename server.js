@@ -6,6 +6,12 @@ const app = express();
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
+//STEP
+//100 = SAUDACAO
+//101 = MENU 2 OPCOES - 2 CLIENTE 3 NAO CLIENTE
+//102 = COLETA CPF (CLIENTE)
+//103 = TRANSFERE
+
 app.get("/step/:id", async (req, res) => {
   try {
     switch (req.params.id) {
@@ -110,7 +116,6 @@ function step103() {
     },
   };
 }
-
 
 // get test info
 app.get("/echo", (req, res) => {
